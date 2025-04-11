@@ -4,9 +4,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include "proto.h"
-#include "shared_hashtable.h"
-#include "proto.h"
-#include "crc16.h"
+#include "crc16.c"
 #include "shared_hashtable.h"
 
 #define PORT 12345
@@ -32,7 +30,7 @@ void handle_client(int sock) {
     size_t payload_len = ntohs(hdr->key_len) + ntohs(hdr->val_len);
     uint16_t received_crc;
     memcpy(&received_crc, buffer + sizeof(packet_header_t) + payload_len, 2);
-    received_crc = (received_crc << 8) | (received_crc >> 8);
+    received_crc = (received_crc << 8) | (received_crc >> 8); // Fix endianness
     uint16_t computed_crc = crc16(buffer, sizeof(packet_header_t) + payload_len);
 
     printf("[Server] Validating CRC: received 0x%04X vs expected 0x%04X\n", received_crc, computed_crc);
@@ -48,8 +46,8 @@ void handle_client(int sock) {
     if (hdr->opcode == OP_SET)
         memcpy(val, buffer + sizeof(packet_header_t) + ntohs(hdr->key_len), ntohs(hdr->val_len));
 
-    printf("[Server] Opcode: 0x%02X, Key: '%s'", hdr->opcode, key);
-    if (hdr->opcode == OP_SET) printf("[Server] SET val='%s'", val);
+    printf("[Server] Opcode: 0x%02X, Key: '%s'\n", hdr->opcode, key);
+    if (hdr->opcode == OP_SET) printf("[Server] SET val='%s'\n", val);
 
     switch (hdr->opcode) {
         case OP_SET:
@@ -57,7 +55,7 @@ void handle_client(int sock) {
             send(sock, "OK", 2, 0);
             break;
         case OP_GET: {
-            printf("[Server] GET lookup for key='%s'", key);
+            printf("[Server] GET lookup for key='%s'\n", key);
             char* found = kv_get(key);
             if (found)
                 send(sock, found, strlen(found), 0);
@@ -84,11 +82,10 @@ void start_server() {
 
     bind(sockfd, (struct sockaddr*)&addr, sizeof(addr));
     listen(sockfd, 5);
-    printf("[Server] Listening on port %d...", PORT);
+    printf("[Server] Listening on port %d...\n", PORT);
 
-    // Enable shared memory (mmap) for hashtable
     if (!init_shared_hashtable()) {
-        fprintf(stderr, "[Server] Failed to init shared hashtable");
+        fprintf(stderr, "[Server] Failed to init shared hashtable\n");
         exit(1);
     }
 
@@ -102,4 +99,4 @@ void start_server() {
         }
         close(client);
     }
-    }
+}

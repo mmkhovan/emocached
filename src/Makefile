@@ -12,7 +12,7 @@ ifeq ($(OS),Windows_NT)
 	EXE := .exe
 endif
 
-SRCS := main.c server.c hashtable.c crc16.c shared_hashtable.c
+SRCS := main.c server.c crc16.c shared_hashtable.c
 OBJS := $(SRCS:.c=.o)
 
 TARGET := emocached$(EXE)

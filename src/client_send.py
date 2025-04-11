@@ -24,7 +24,7 @@ def make_packet(opcode, key, value=b""):
     value = value.encode() if isinstance(value, str) else value
     header = struct.pack(">H B H H", HEART, opcode, len(key), len(value))
     body = key + value
-    checksum = struct.pack(">H", crc16(header + body))  # Big endian
+    checksum = struct.pack(">H", crc16(header + body))
     return header + body + checksum
 
 def send_packet(pkt):

@@ -1,5 +1,3 @@
-// в hashtable.h (или shared_hashtable.h)
-
 #ifndef SHARED_HASHTABLE_H
 #define SHARED_HASHTABLE_H
 

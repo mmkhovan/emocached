@@ -8,11 +8,20 @@
 
 #define SHM_NAME "/emocached_kv"
 #define SHM_SIZE (sizeof(HashTable))
+#include "proto.h"
+
+unsigned hash_key(const char* key) {
+    unsigned hash = 5381;
+    int c;
+    while ((c = *key++))
+        hash = ((hash << 5) + hash) + c;
+    return hash;
+}
 
 static HashTable* shared_table = NULL;
 
 int init_shared_hashtable() {
-    shm_unlink(SHM_NAME);
+    shm_unlink(SHM_NAME); // cleanup old segment if it exists
     int fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
     if (fd == -1) return 0;
     if (ftruncate(fd, SHM_SIZE) == -1) return 0;
