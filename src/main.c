@@ -1,7 +1,6 @@
-#include "hashtable.h"
-void start_server();
+#include "server.h"
+
 int main() {
-    kv_init();
     start_server();
     return 0;
 }
